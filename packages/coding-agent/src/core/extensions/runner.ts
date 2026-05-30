@@ -15,6 +15,8 @@ import type {
 	BeforeAgentStartEvent,
 	BeforeAgentStartEventResult,
 	BeforeProviderRequestEvent,
+	CommandStartEvent,
+	CommandStartEventResult,
 	CompactOptions,
 	ContextEvent,
 	ContextEventResult,
@@ -123,6 +125,7 @@ type RunnerEmitEvent = Exclude<
 	| MessageEndEvent
 	| ResourcesDiscoverEvent
 	| InputEvent
+	| CommandStartEvent
 >;
 
 type SessionBeforeEvent = Extract<
@@ -1075,5 +1078,27 @@ export class ExtensionRunner {
 		return currentText !== text || currentImages !== images
 			? { action: "transform", text: currentText, images: currentImages }
 			: { action: "continue" };
+	}
+
+	async emitCommandStart(event: CommandStartEvent): Promise<CommandStartEventResult | undefined> {
+		const ctx = this.createContext();
+		for (const ext of this.extensions) {
+			const handlers = ext.handlers.get("command_start");
+			if (!handlers || handlers.length === 0) continue;
+			for (const handler of handlers) {
+				try {
+					const result = (await handler(event, ctx)) as CommandStartEventResult | undefined;
+					if (result?.cancel) return result;
+				} catch (err) {
+					this.emitError({
+						extensionPath: ext.path,
+						event: "command_start",
+						error: err instanceof Error ? err.message : String(err),
+						stack: err instanceof Error ? err.stack : undefined,
+					});
+				}
+			}
+		}
+		return undefined;
 	}
 }

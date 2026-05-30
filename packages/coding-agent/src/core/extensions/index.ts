@@ -39,6 +39,8 @@ export type {
 	BeforeProviderRequestEventResult,
 	BuildSystemPromptOptions,
 	// Context
+	CommandStartEvent,
+	CommandStartEventResult,
 	CompactOptions,
 	// Events - Agent
 	ContextEvent,
