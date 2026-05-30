@@ -705,6 +705,24 @@ export interface ToolExecutionEndEvent {
 }
 
 // ============================================================================
+// Command Events
+// ============================================================================
+
+/** Fired before an extension command handler is invoked */
+export interface CommandStartEvent {
+	type: "command_start";
+	/** The command name, without the leading slash */
+	commandName: string;
+	/** The raw argument string passed to the command */
+	args: string;
+}
+
+export interface CommandStartEventResult {
+	/** If true, the command handler is not invoked */
+	cancel?: boolean;
+}
+
+// ============================================================================
 // Model Events
 // ============================================================================
 
@@ -971,7 +989,8 @@ export type ExtensionEvent =
 	| UserBashEvent
 	| InputEvent
 	| ToolCallEvent
-	| ToolResultEvent;
+	| ToolResultEvent
+	| CommandStartEvent;
 
 // ============================================================================
 // Event Results
@@ -1126,6 +1145,7 @@ export interface ExtensionAPI {
 	on(event: "tool_result", handler: ExtensionHandler<ToolResultEvent, ToolResultEventResult>): void;
 	on(event: "user_bash", handler: ExtensionHandler<UserBashEvent, UserBashEventResult>): void;
 	on(event: "input", handler: ExtensionHandler<InputEvent, InputEventResult>): void;
+	on(event: "command_start", handler: ExtensionHandler<CommandStartEvent, CommandStartEventResult>): void;
 
 	// =========================================================================
 	// Tool Registration

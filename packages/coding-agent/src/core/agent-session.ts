@@ -1149,6 +1149,8 @@ export class AgentSession {
 		const ctx = this._extensionRunner.createCommandContext();
 
 		try {
+			const startResult = await this._extensionRunner.emitCommandStart({ type: "command_start", commandName, args });
+			if (startResult?.cancel) return true;
 			await command.handler(args, ctx);
 			return true;
 		} catch (err) {
